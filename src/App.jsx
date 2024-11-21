@@ -1,19 +1,18 @@
-import { useEffect, useState } from "react";
 import Body from "./components/Body";
 import Converter from "./components/Converter";
 import Loader from "./components/Loader";
 import useFetch from "./hooks/useFetch";
 
 export default function App() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [rates, setRates] = useState(null);
+  const { loading, data, error } = useFetch("latest");
 
-  useEffect(() => {
-    const data = useFetch();
+  if (error) {
+    return (
+      <Body>
+        <p>Error: {error}</p>
+      </Body>
+    );
+  }
 
-    setRates(data);
-    setIsLoading(false);
-  }, []);
-
-  return <Body>{isLoading ? <Loader /> : <Converter rates={rates} />}</Body>;
+  return <Body>{loading ? <Loader /> : <Converter rates={data} />}</Body>;
 }

@@ -1,16 +1,36 @@
-const useFetch = async () => {
+import { useState, useEffect } from "react";
+
+const useFetch = (endpoint) => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const apiKey = import.meta.env.VITE_API_KEY;
   const baseUrl = import.meta.env.VITE_BASE_URL;
 
-  try {
-    const data = await fetch(`${baseUrl}latest?access_key=${apiKey}`);
-    const res = await data.json();
-    const rates = res.rates;
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          `${baseUrl}${endpoint}?access_key=${apiKey}`
+        );
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status} ${response.statusText}`);
+        }
 
-    return rates;
-  } catch (error) {
-    console.error(error);
-  }
+        const json = await response.json();
+        setData(json.rates);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [endpoint]);
+
+  return { data, loading, error };
 };
 
 export default useFetch;
